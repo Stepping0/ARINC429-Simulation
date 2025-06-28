@@ -1,54 +1,47 @@
-# ARINC 429 Simülasyon ve Trend Tabanlı DFA Doğrulama
+# ARINC429-Simulation
 
-Bu proje, havacılıkta yaygın olarak kullanılan **ARINC 429 veri iletişim protokolü** üzerine kurulmuş, MATLAB/Simulink ortamında gerçekleştirilmiş bir simülasyon ve analiz uygulamasıdır. Ayrıca, iletilen verilerin doğruluğunu kontrol etmek amacıyla **Deterministik Sonlu Otomat (DFA)** tabanlı trend analizi uygulanmıştır.
+Bu proje, havacılık elektroniğinde yaygın olarak kullanılan **ARINC 429 iletişim protokolü** ve bu protokolden alınan veriler üzerinde **trend tabanlı doğrulama** gerçekleştiren bir sistemin MATLAB/Simulink ortamında simülasyonunu içermektedir.
 
-## 🔧 Kullanılan Teknolojiler
+## 🎯 Amaç
 
-- MATLAB R2023a
-- Simulink
-- S-Function (C dili ile)
-- SQLite (veri saklama ve analiz için)
-- MATLAB Function blokları
+- ARINC 429 veri yapısının modellenmesi
+- S-Function tabanlı kod çözücülerin uygulanması
+- DFA (Deterministik Sonlu Otomat) ile trend tabanlı veri doğrulama
+- Gerçek zamanlı verilerin işlenmesi ve analiz edilmesi
 
-## 📌 Proje Bileşenleri
+## 🛠️ Kullanılan Dosyalar
 
-### 1. ARINC 429 Simülasyon Bloğu
-- ARINC 429 protokolüne uygun olarak veri kelimeleri oluşturur.
-- Label, SDI, Data, SSM ve Parity bitlerini içerir.
+| Dosya / Klasör                    | Açıklama |
+|----------------------------------|----------|
+| `arinc429_decoder.slx`           | Simulink modeli (ARINC kelimesi çözümleme) |
+| `arinc_label_sfunction.c`        | Label ayrıştırıcı S-Function (C kodu) |
+| `trend_dfa_sfunc_flight.c`       | DFA trend analizi yapan S-Function (uçuş verisi için) |
+| `*.mexw64`                        | Windows için derlenmiş S-Function binary dosyaları |
+| `arinc429_bcd_to_decimal.c`      | BCD → Decimal dönüşüm fonksiyonu |
+| `arinc429_decimal_to_bcd.c`      | Decimal → BCD dönüşüm fonksiyonu |
+| `data_original.m`, `datas.m`     | Örnek veri hazırlama scriptleri |
+| `filtered_data.csv`              | Filtrelenmiş çıktı verisi (trend sonucu) |
+| `flight_simulation_data.mat`     | Simülasyonda kullanılan uçuş verileri |
+| `simulation_database_creator.m`  | SQLite tabanlı veri tabanı oluşturucu |
+| `arinc_verileridb`               | Oluşturulan SQLite veritabanı |
 
-### 2. DFA Tabanlı Doğrulama Sistemi
-- Sinyal trendlerini izleyerek aşağıdaki beş durumu belirler:
-  - **STABLE**
-  - **INCREASING**
-  - **DECREASING**
-  - **OSCILLATING**
-  - **ANOMALY**
-- Her bir durum için eşik değerleri S-Function içinde C kodu olarak tanımlanmıştır.
+## 💡 Nasıl Çalıştırılır?
 
-### 3. Veri Tabanı Entegrasyonu (Opsiyonel)
-- Simülasyon sonuçları SQLite veritabanına kaydedilebilir.
-- Veriler: hız, irtifa, konum, dikey hız, analiz sonuçları vb.
-  
-
-## ▶️ Nasıl Çalıştırılır?
-
-1. MATLAB'i açın ve proje klasörünü çalışma dizini olarak ayarlayın.
-2. `arinc_decoder.slx` dosyasını açın.
-3. Simülasyonu başlatın (`Run` tuşu).
-4. DFA sonucu ve çıkış verilerini `Scope` bloklarından veya veritabanından kontrol edin.
-
-## 📈 Örnek Çıktılar
-
-- Trend DFA Durumları: STABLE → INCREASING → ANOMALY
-- ARINC kelimesi örneği: `Label: 203, SDI: 01, Data: 12345, Parity: OK`
-
-## 📚 Kaynaklar
-
-- ARINC 429 Standard Documentation
-- MATLAB & Simulink Documentation
-- DFA (Deterministic Finite Automaton) Teorisi
+1. MATLAB’i açın ve proje klasörünü çalışma dizini yapın.
+2. `arinc429_decoder.slx` dosyasını açın.
+3. `Run` tuşuna basarak simülasyonu başlatın.
+4. DFA durumlarını ve çıkış verilerini `Scope` bloklarından veya `.csv` ve `.db` dosyalarından inceleyin.
 
 ## 📌 Notlar
 
-- `examples`, `slprj`, `arinc429_grt_rtw` gibi derleme klasörleri `.gitignore` içinde tutulmalıdır.
-- Kod ve model sadece eğitim amaçlıdır.
+- `*.mexw64` dosyaları ilgili `.c` dosyalarından MATLAB `mex` komutu ile oluşturulmuştur.
+- `.slx.original` dosyası, modelin yedeğidir ve doğrudan kullanılmaz.
+- `arinc_verileridb` SQLite veritabanı olarak dışa aktarılmıştır. Veritabanı bağlantısı için MATLAB'de `sqlite()` fonksiyonu kullanılabilir.
+
+## 🔍 DFA Trend Durumları
+
+- `STABLE`: Kararlı veri
+- `INCREASING`: Artış gösteren veri
+- `DECREASING`: Azalan veri
+- `OSCILLATING`: Dalgalı veri
+- `ANOMALY`: Anormal değişim
